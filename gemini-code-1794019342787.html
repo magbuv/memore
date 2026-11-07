@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MemRe Caregiver</title>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f3f6f5;--ink:#17313a;--mute:#54696f;--card:#fff;--line:#d3dedb;--accent:#1d6b7a;--onaccent:#fff;--reward:#e0a526;--warn:#b4532a;--good:#2b7a4b;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);height:100%}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10191c;--ink:#e4eeee;--mute:#9ab0b3;--card:#172327;--line:#28393d;--accent:#5cc0d0;--onaccent:#0c1a1d;--reward:#f0bf4f;--warn:#e58a5f;--good:#6fcf97;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#10191c;--ink:#e4eeee;--mute:#9ab0b3;--card:#172327;--line:#28393d;--accent:#5cc0d0;--onaccent:#0c1a1d;--reward:#f0bf4f;--warn:#e58a5f;--good:#6fcf97;color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:16px/1.4 "Atkinson Hyperlegible",system-ui,sans-serif;overflow:hidden}
+.wrap{max-width:560px;margin:0 auto;zoom:var(--z,1);height:calc((100vh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px)) / var(--z,1));height:calc((100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px)) / var(--z,1));display:flex;flex-direction:column;padding:10px 14px 10px}
+h1{font-size:20px;margin:0 0 6px}h2{font-size:18px;margin:0}h3{font-size:16px;margin:0}
+p{margin:0}.mute{color:var(--mute)}.small{font-size:14px}
+nav{display:flex;gap:2px;border-bottom:2px solid var(--line);margin-bottom:10px;flex:none}
+nav button{flex:1;background:none;border:0;border-bottom:4px solid transparent;margin-bottom:-2px;padding:10px 2px;font:inherit;font-weight:700;color:var(--mute);cursor:pointer}
+nav button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+section{flex:1;min-height:0;display:flex;flex-direction:column;gap:10px;overflow:auto}
+section.hidden{display:none}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.grow{flex:1;min-height:0;display:flex;flex-direction:column}
+label{display:block;font-size:14px;color:var(--mute);margin:6px 0 3px}
+input,textarea{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+textarea{resize:none;height:96px}
+.btn{font:inherit;font-weight:700;border-radius:10px;border:2px solid var(--accent);background:var(--accent);color:var(--onaccent);padding:9px 16px;cursor:pointer}
+.btn.ghost{background:none;color:var(--accent)}.btn.sm{padding:5px 12px;font-size:15px}
+.btn.rec.on{background:var(--warn);border-color:var(--warn);color:#fff}
+.btn.rw{background:var(--reward);border-color:var(--reward);color:#2b2000}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px}
+.between{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.chips{display:flex;align-items:center;gap:6px;margin:10px 0}
+.chips i{color:var(--mute);font-style:normal}
+.chip{flex:1;font:inherit;font-weight:700;font-size:15px;padding:9px 4px;border-radius:10px;border:2px solid var(--line);background:none;color:var(--mute);cursor:pointer}
+.chip[aria-pressed="true"]{border-color:var(--accent);color:var(--ink);background:var(--bg)}
+.chip.rwd[aria-pressed="true"]{border-color:var(--reward)}
+.hidden{display:none}
+.demo{align-items:center;text-align:center;justify-content:space-evenly}
+.trail{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;font-size:14px}
+.trail span{padding:3px 10px;border-radius:99px;border:1px solid var(--line);color:var(--mute)}
+.trail span.done{background:var(--good);color:#fff;border-color:var(--good)}
+.pad{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;width:min(300px,100%,34dvh)}
+.k{aspect-ratio:1;border:0;border-radius:10px;background:#2aa6c4;color:#06222b;font:700 20px "Atkinson Hyperlegible",system-ui,sans-serif;box-shadow:0 5px 0 rgba(0,0,0,.28);cursor:pointer;padding:0}
+.k:active{transform:translateY(4px);box-shadow:0 1px 0 rgba(0,0,0,.28)}
+.k.r{background:#d2455c;color:#fff}.k.off{opacity:.4}.k.on{outline:4px solid var(--reward);outline-offset:2px}
+.lvl{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border:2px solid var(--line);border-radius:10px;cursor:pointer;margin:0 0 6px;color:var(--ink);font-size:16px}
+.lvl input{width:auto;margin-top:4px}.lvl.sel{border-color:var(--accent)}.lvl b{display:block}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat{font-size:24px;font-weight:700;line-height:1.1}
+.flag{display:inline-block;padding:2px 10px;border-radius:99px;font-weight:700;font-size:14px;color:#fff}
+.flag.good{background:var(--good)}.flag.steady{background:var(--mute)}.flag.warn{background:var(--warn)}
+.chartbox{flex:1;min-height:0;display:flex}
+.chart{width:100%;height:100%}
+.chart text{fill:var(--mute);font-size:11px}
+.seg{display:flex;gap:6px;margin-bottom:6px}
+.note{border-left:4px solid var(--reward);padding:6px 10px;background:var(--bg);border-radius:0 8px 8px 0;font-size:15px}
+nav button{font-size:15px}
+:root.hc{--bg:#000;--ink:#fff;--mute:#e0e0e0;--card:#000;--line:#bdbdbd;--accent:#ffe14d;--onaccent:#000;--reward:#ffa43a;--warn:#ff8a65;--good:#4ade80;color-scheme:dark}
+.hc .card{border-width:2px}.hc .k{background:#fff;color:#000}.hc .k.r{background:#ffe14d;color:#000}
+.big .btn{padding:14px 20px;font-size:18px}.big .btn.sm{padding:11px 16px}.big .chip{padding:15px 4px}.big nav button{padding:15px 2px}.big .k{font-size:26px}.big .pad{gap:14px}
+.sheet{position:fixed;inset:0;z-index:20;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:14px}
+.sheet.hidden{display:none}
+.sheetin{width:100%;max-width:480px;max-height:100%;overflow:auto;font-size:18px}
+.camO{position:fixed;inset:0;z-index:10;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:env(safe-area-inset-top,0px) 16px env(safe-area-inset-bottom,0px)}
+.camO.hidden{display:none}
+.camO video{width:100%;max-width:480px;max-height:60dvh;border-radius:12px;background:#111;transform:scaleX(-1)}
+.camM{color:#fff;font-size:20px;font-weight:700;text-align:center}
+.photos{display:grid;grid-template-columns:1fr 1fr;gap:10px;overflow:auto}
+.ph{margin:0}.ph img{width:100%;border-radius:8px;display:block;aspect-ratio:4/3;object-fit:cover}
+.thumb{width:96px;border-radius:8px;display:block;margin-top:8px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="between" style="margin-bottom:6px"><h1 style="margin:0">MemRe for caregivers</h1><button class="btn sm ghost" id="a11yBtn" aria-haspopup="dialog">Accessibility</button></div>
+<nav role="tablist">
+<button role="tab" aria-selected="false" data-tab="demo">Device</button>
+<button role="tab" aria-selected="true" data-tab="seq">Routine</button>
+<button role="tab" aria-selected="false" data-tab="fade">Fading</button>
+<button role="tab" aria-selected="false" data-tab="prog">Progress</button>
+<button role="tab" aria-selected="false" data-tab="cam">Photos</button>
+</nav>
+
+<section id="seq">
+<div class="card grow">
+<div class="between"><h2>Morning pill routine</h2><input id="when" type="time" value="08:00" style="width:120px" aria-label="Daily time"></div>
+<p class="mute small">Same tone, voice, time and spot every day. One action per step, no wrong answers.</p>
+<div class="chips" role="group" aria-label="Routine steps">
+<button class="chip" data-ed="1" aria-pressed="true">1 Pill in hand</button><i>›</i>
+<button class="chip" data-ed="2" aria-pressed="false">2 Swallowed</button><i>›</i>
+<button class="chip rwd" data-ed="3" aria-pressed="false">★ Reward</button>
+</div>
+<div class="ed" id="ed1"><label for="t1">Spoken prompt, full version</label>
+<textarea id="t1">Good morning, Mom. Pick up your pill and hold it in your hand. Then press the button.</textarea></div>
+<div class="ed hidden" id="ed2"><label for="t2">Spoken prompt, full version</label>
+<textarea id="t2">Now take a sip of water and swallow. Press the button when you’re done.</textarea></div>
+<div class="ed hidden" id="ed3"><label for="t3">Reward, played right after step 2</label>
+<textarea id="t3">Thank you, Mom. That’s it. All done.</textarea></div>
+<div class="row"><button class="btn sm rec" id="recBtn">Record my voice</button><button class="btn sm ghost" id="playBtn">Play</button></div>
+<p class="small mute" id="recStatus" style="margin-top:6px">Using computer voice</p>
+<label class="lvl" style="margin-top:12px"><input type="checkbox" id="camOn"><span><b>Camera check at step 1</b><span class="mute small">Takes a photo of her open hand when she presses key 1. You review it in Photos.</span></span></label>
+</div>
+</section>
+
+<section id="demo" class="hidden">
+<div class="card grow demo">
+<div class="trail" id="trail"><span>Cue</span><span>Pill in hand</span><span>Swallowed</span><span>Reward</span></div>
+<button class="btn" id="key">Start the cue</button>
+<div class="pad" id="pad"></div>
+<div class="small mute" id="demoMsg">Tap Start the cue, then press key 1. Prompt level: <b id="lvlName">Full</b></div>
+<div class="small mute">Key 1 is this routine’s key, A repeats the prompt, other keys are free for more routines. Timings are added to Progress.</div>
+</div>
+</section>
+
+<section id="fade" class="hidden">
+<div class="card">
+<h2>Prompt level</h2>
+<p class="mute small" style="margin-bottom:8px">Give less help as the routine becomes automatic, more if it slips.</p>
+<div id="levels"></div>
+</div>
+<div class="card">
+<div class="grid2">
+<div><label for="fadeAt">Less help if under (sec)</label><input id="fadeAt" type="number" min="1" value="5"></div>
+<div><label for="backAt">More help if over (sec)</label><input id="backAt" type="number" min="1" value="10"></div>
+</div>
+<div id="rec" class="note" style="margin-top:8px"></div>
+<div class="row"><button class="btn sm" id="apply">Apply suggestion</button></div>
+</div>
+</section>
+
+<section id="prog" class="hidden">
+<div class="grid2">
+<div class="card"><div class="small mute">Completed, 14 days</div><div class="stat" id="comp">–</div></div>
+<div class="card"><div class="small mute">Trend</div><div id="trend"></div></div>
+</div>
+<div class="card grow">
+<div class="seg"><button class="chip" id="sA" aria-pressed="true">Cue to hand</button><button class="chip" id="sB" aria-pressed="false">Hand to swallow</button></div>
+<p class="small mute" id="chartNote"></p>
+<div class="chartbox"><svg class="chart" id="c" viewBox="0 0 600 220" role="img" aria-label="Seconds per day"></svg></div>
+</div>
+<div class="card">
+<div class="between"><span class="small">Device log, <code>date,cue_to_hand,hand_to_swallow</code></span></div>
+<input type="file" id="file" accept=".csv,.txt" aria-label="Import device log" style="margin-top:6px;padding:5px">
+<div class="small mute" id="imp" style="margin-top:4px">Sample data shown. Numbers are illustrative, not clinical.</div>
+</div>
+</section>
+
+<section id="cam" class="hidden">
+<div class="card">
+<div class="between"><div><h3>Reference pill</h3><p class="small mute">A photo of the correct pill in a hand, to compare against.</p></div><button class="btn sm" id="refBtn">Take photo</button></div>
+<img id="refImg" class="thumb hidden" alt="Reference pill photo">
+</div>
+<div class="card grow">
+<h3>Check-ins</h3>
+<p class="small mute" style="margin-bottom:8px">The app doesn’t identify pills. Compare each photo with the reference and mark it.</p>
+<div class="photos" id="photos"></div>
+</div>
+</section>
+</div>
+
+<div id="a11y" class="sheet hidden" role="dialog" aria-modal="true" aria-label="Accessibility settings"><div class="card sheetin">
+<h2>Accessibility</h2>
+<label>Text size</label>
+<div class="chips"><button class="chip" data-ts="1">Normal</button><button class="chip" data-ts="1.15">Large</button><button class="chip" data-ts="1.3">Extra large</button></div>
+<label>Voice speed</label>
+<div class="chips"><button class="chip" data-rate="0.7">Slower</button><button class="chip" data-rate="0.9">Normal</button></div>
+<label class="lvl"><input type="checkbox" id="hc"><span><b>High contrast</b><span class="mute small">Black background, white and yellow text.</span></span></label>
+<label class="lvl"><input type="checkbox" id="bigB"><span><b>Bigger buttons</b><span class="mute small">Larger touch targets with more space between them.</span></span></label>
+<label class="lvl"><input type="checkbox" id="vib"><span><b>Vibrate on key press</b><span class="mute small">A short buzz confirms each press, on phones that support it.</span></span></label>
+<label class="lvl"><input type="checkbox" id="rep"><span><b>Repeat the prompt after 20 seconds</b><span class="mute small">If she hasn’t pressed, the same prompt plays again.</span></span></label>
+<button class="btn" id="a11yDone" style="width:100%;margin-top:6px">Done</button>
+</div></div>
+
+<div id="camO" class="camO hidden"><video id="camV" playsinline muted></video><div class="camM" id="camMsg"></div><button class="btn ghost" id="camSkip" style="color:#fff;border-color:#fff">Skip photo</button></div>
+
+<script>
+var $=function(s){return document.querySelector(s)};
+var LEVELS=[{n:"Full",d:"Tone, then the whole spoken instruction."},{n:"Short",d:"Tone, then just the first few words."},{n:"Tone only",d:"The tone alone. The routine carries the rest."}];
+var level=0,series="A",edNum="1";
+var A=[9,8,8.5,7,null,6,6.5,5,5.5,4.5,4,4.8,3.9,3.6];
+var B=[48,52,40,45,null,34,28,26,31,22,20,24,18,17];
+var recs={},recorder=null,chunks=[];
+
+document.querySelectorAll("nav button").forEach(function(b){b.onclick=function(){
+ document.querySelectorAll("nav button").forEach(function(x){x.setAttribute("aria-selected",x===b)});
+ ["seq","demo","fade","prog","cam"].forEach(function(id){$("#"+id).classList.toggle("hidden",id!==b.dataset.tab)});
+ if(b.dataset.tab==="prog")drawProgress();if(b.dataset.tab==="fade")drawFade();if(b.dataset.tab==="cam")drawPhotos();
+}});
+
+var ac=null;
+function tone(f,d,t){try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();var o=ac.createOscillator(),g=ac.createGain();o.type=t||"sine";o.frequency.value=f;g.gain.setValueAtTime(.25,ac.currentTime);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+d);o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+d)}catch(e){}}
+
+// Proper Text-to-Speech implementation with global reference array to prevent mobile garbage-collection bugs
+var activeUtterances = [];
+function say(text){
+  try {
+    if (!('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+    var u = new SpeechSynthesisUtterance(text);
+    u.rate = S.rate;
+    u.onend = function() {
+      activeUtterances = activeUtterances.filter(function(item){ return item !== u; });
+    };
+    activeUtterances.push(u);
+    window.speechSynthesis.speak(u);
+  } catch(e) {
+    console.error("TTS error:", e);
+  }
+}
+
+function promptFor(i){
+ if(recs[i]&&level<2){new Audio(recs[i]).play();return}
+ var t=$("#t"+i).value.trim();
+ if(level===1)t=t.split(/\s+/).slice(0,4).join(" ");
+ if(level===2)return;
+ say(t);
+}
+
+/* routine editor: one step at a time */
+function showEd(n){
+ edNum=n;
+ document.querySelectorAll("[data-ed]").forEach(function(c){c.setAttribute("aria-pressed",c.dataset.ed===n)});
+ [1,2,3].forEach(function(i){$("#ed"+i).classList.toggle("hidden",String(i)!==n)});
+ $("#recBtn").textContent=recs[n]?"Record again":"Record my voice";
+ $("#recStatus").textContent=recs[n]?"Your voice is saved for this session":"Using computer voice";
+}
+document.querySelectorAll("[data-ed]").forEach(function(c){c.onclick=function(){showEd(c.dataset.ed)}});
+$("#playBtn").onclick=function(){if(recs[edNum])new Audio(recs[edNum]).play();else say($("#t"+edNum).value)};
+$("#recBtn").onclick=function(){
+ var i=edNum,b=$("#recBtn"),s=$("#recStatus");
+ if(recorder&&recorder.state==="recording"){recorder.stop();return}
+ if(!navigator.mediaDevices||!window.MediaRecorder){s.textContent="Recording isn’t available in this browser";return}
+ navigator.mediaDevices.getUserMedia({audio:true}).then(function(stm){
+  chunks=[];recorder=new MediaRecorder(stm);
+  recorder.ondataavailable=function(e){chunks.push(e.data)};
+  recorder.onstop=function(){stm.getTracks().forEach(function(t){t.stop()});recs[i]=URL.createObjectURL(new Blob(chunks));b.classList.remove("on");if(edNum===i)showEd(i)};
+  recorder.start();b.textContent="Stop recording";b.classList.add("on");s.textContent="Recording…";
+ }).catch(function(){s.textContent="Microphone access was blocked"});
+};
+
+/* demo loop */
+var st=0,t0=0,tA=0,tB=0,trail=document.querySelectorAll("#trail span");
+function setTrail(n){trail.forEach(function(s,i){s.classList.toggle("done",i<n)})}
+var key=$("#key");
+key.onclick=function(){if(st===0)press()};
+var press=function(){
+ var now=Date.now();
+ if(st===0){tone(523,.4);promptFor(1);st=1;t0=now;setTrail(1);key.textContent="Waiting: pill in hand";$("#demoMsg").textContent="Press key 1 when the pill is in hand."}
+ else if(st===1){tone(659,.15,"triangle");tA=(now-t0)/1000;t0=now;st=2;setTrail(2);key.textContent="Waiting: swallowed";$("#demoMsg").textContent="Press key 1 after swallowing.";if(camOn())openCam("Hold the pill in your open hand. Photo in",function(u){t0+=Date.now()-now;if(u)photos.unshift({u:u,t:new Date().toLocaleTimeString([],{hour:"numeric",minute:"2-digit"}),ok:null});promptFor(2)},3);else promptFor(2)}
+ else if(st===2){tB=(now-t0)/1000;tone(784,.25);setTimeout(function(){tone(1047,.5)},180);
+  if(recs[3])new Audio(recs[3]).play();else say($("#t3").value);
+  A.push(+tA.toFixed(1));B.push(+tB.toFixed(1));A.shift();B.shift();
+  st=0;setTrail(4);key.classList.add("rw");key.textContent="★ Done";$("#demoMsg").textContent="Logged: "+tA.toFixed(1)+" s to hand, "+tB.toFixed(1)+" s to swallow.";
+  setTimeout(function(){key.classList.remove("rw");key.textContent="Start the cue";setTrail(0)},3500)}
+};
+var KEYS=["1","2","3","A","4","5","6","B","7","8","9","C","*","0","#","D"];
+$("#pad").innerHTML=KEYS.map(function(k){var red=!/\d/.test(k);return '<button class="k'+(red?' r':'')+(k==='1'?' on':(k==='A'?'':' off'))+'" data-k="'+k+'" aria-label="Key '+k+'">'+k+'</button>'}).join("");
+document.querySelectorAll("[data-k]").forEach(function(b){b.onclick=function(){
+ var k=b.dataset.k,m=$("#demoMsg");if(S.vib&&navigator.vibrate)navigator.vibrate(40);
+ if(k==="1"){if(st>0)press();else{tone(330,.15,"triangle");m.textContent="Tap Start the cue first. On the device, the schedule does this."}}
+ else if(k==="A"){tone(659,.15,"triangle");if(st>0)promptFor(st);else m.textContent="Nothing to repeat yet."}
+ else{tone(330,.15,"triangle");m.textContent="Key "+k+" isn’t used in this routine."}
+}});
+
+/* Robust Camera Access with Fallbacks & Permissions Handling */
+var photos=[],refPhoto=null,camStream=null,camCb=null;
+function camOn(){return $("#camOn").checked}
+function openCam(label,cb,secs){
+ camCb=cb;
+ $("#camO").classList.remove("hidden");
+ $("#camMsg").textContent="Starting camera…";
+ 
+ if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
+  $("#camMsg").textContent="Camera not supported in this browser. Continuing without a photo.";
+  setTimeout(function(){closeCam(null)},1500);
+  return;
+ }
+
+ navigator.mediaDevices.getUserMedia({video:{facingMode:"user"}})
+ .catch(function(){
+  // Fallback to any available video stream if user-facing constraint fails
+  return navigator.mediaDevices.getUserMedia({video:true});
+ })
+ .then(function(s){
+  if(!camCb){
+   s.getTracks().forEach(function(t){t.stop()});
+   return;
+  }
+  camStream=s;
+  var v=$("#camV");
+  v.srcObject=s;
+  v.play().catch(function(err){ console.warn("Video autoplay prevented:", err); });
+  
+  var n=secs;
+  $("#camMsg").textContent=label+" "+n;
+  var iv=setInterval(function(){
+   if(!camStream){clearInterval(iv);return}
+   n--;
+   if(n<=0){
+    clearInterval(iv);
+    snap();
+   } else {
+    $("#camMsg").textContent=label+" "+n;
+   }
+  },1000);
+ })
+ .catch(function(err){
+  console.error("Camera access error:", err);
+  var msg = "Camera blocked or unavailable.";
+  if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
+   msg = "Camera permission denied. Check browser permissions.";
+  } else if (err.name === "NotFoundError" || err.name === "DevicesNotFoundError") {
+   msg = "No camera device detected.";
+  }
+  $("#camMsg").textContent = msg + " Continuing without a photo.";
+  setTimeout(function(){closeCam(null)},2000);
+ });
+}
+
+function snap(){
+ var v=$("#camV"),c=document.createElement("canvas");
+ c.width=320;
+ c.height=Math.round(320*(v.videoHeight||240)/(v.videoWidth||320));
+ try {
+  c.getContext("2d").drawImage(v,0,0,c.width,c.height);
+  closeCam(c.toDataURL("image/jpeg",.7));
+ } catch(e) {
+  console.error("Canvas snap error:", e);
+  closeCam(null);
+ }
+}
+
+function closeCam(url){
+ if(camStream){
+  camStream.getTracks().forEach(function(t){t.stop()});
+  camStream=null;
+ }
+ $("#camO").classList.add("hidden");
+ var cb=camCb;
+ camCb=null;
+ if(cb)cb(url);
+}
+
+$("#camSkip").onclick=function(){closeCam(null)};
+$("#refBtn").onclick=function(){openCam("Hold the correct pill in your open hand. Photo in",function(u){if(u)refPhoto=u;drawPhotos()},3)};
+function drawPhotos(){
+ var r=$("#refImg");if(refPhoto){r.src=refPhoto;r.classList.remove("hidden");$("#refBtn").textContent="Retake"}
+ var g=$("#photos");
+ if(!photos.length){g.innerHTML='<p class="small mute">No photos yet. Turn on the camera check in Routine, then run the loop on the Device tab.</p>';return}
+ g.innerHTML=photos.slice(0,4).map(function(p,i){return '<figure class="ph"><img alt="Check-in photo at '+p.t+'" src="'+p.u+'"><figcaption class="small">'+p.t+(p.ok===true?' (reviewed)':p.ok===false?' (flagged)':'')+'</figcaption><div class="row" style="margin:4px 0 0"><button class="btn sm'+(p.ok===true?'':' ghost')+'" data-ok="'+i+'" data-v="1">Looks right</button><button class="btn sm'+(p.ok===false?'':' ghost')+'" data-ok="'+i+'" data-v="0">Not sure</button></div></figure>'}).join("");
+ g.querySelectorAll("[data-ok]").forEach(function(b){b.onclick=function(){photos[+b.dataset.ok].ok=b.dataset.v==="1";drawPhotos()}});
+}
+
+/* accessibility */
+var S={z:1,rate:0.9,hc:false,big:false,vib:false,rep:false};
+try{var sv=JSON.parse(localStorage.getItem("memreA11y"));if(sv)for(var q in sv)S[q]=sv[q]}catch(e){}
+function applyA(){
+ var R=document.documentElement;R.classList.toggle("hc",S.hc);R.classList.toggle("big",S.big);R.style.setProperty("--z",S.z);
+ document.querySelectorAll("[data-ts]").forEach(function(c){c.setAttribute("aria-pressed",+c.dataset.ts===S.z)});
+ document.querySelectorAll("[data-rate]").forEach(function(c){c.setAttribute("aria-pressed",+c.dataset.rate===S.rate)});
+ $("#hc").checked=S.hc;$("#bigB").checked=S.big;$("#vib").checked=S.vib;$("#rep").checked=S.rep;
+ try{localStorage.setItem("memreA11y",JSON.stringify(S))}catch(e){}
+}
+document.querySelectorAll("[data-ts]").forEach(function(c){c.onclick=function(){S.z=+c.dataset.ts;applyA()}});
+document.querySelectorAll("[data-rate]").forEach(function(c){c.onclick=function(){S.rate=+c.dataset.rate;applyA();say("This is how fast I will speak.")}});
+[["hc","hc"],["bigB","big"],["vib","vib"],["rep","rep"]].forEach(function(p){$("#"+p[0]).onchange=function(){S[p[1]]=this.checked;applyA()}});
+$("#a11yBtn").onclick=function(){$("#a11y").classList.remove("hidden");$("#a11yDone").focus()};
+$("#a11yDone").onclick=function(){$("#a11y").classList.add("hidden");$("#a11yBtn").focus()};
+document.addEventListener("keydown",function(e){if(e.key==="Escape"&&!$("#a11y").classList.contains("hidden"))$("#a11yDone").click()});
+var prevSt=0,lastP=0;
+setInterval(function(){if(st!==prevSt){prevSt=st;lastP=Date.now()}if(S.rep&&st>0&&!camStream&&Date.now()-lastP>=20000){lastP=Date.now();tone(523,.4);promptFor(st)}},1000);
+applyA();
+
+/* fading */
+function setLevel(n){level=n;$("#lvlName").textContent=LEVELS[n].n;drawFade()}
+function suggestion(){
+ var v=A.filter(function(x){return x!=null}).slice(-3),f=+$("#fadeAt").value,b=+$("#backAt").value;
+ if(v.length<3)return{lvl:level,txt:"Not enough sessions yet. Keep the current level."};
+ if(v.every(function(x){return x<=f})&&level<2)return{lvl:level+1,txt:"The last 3 sessions were all within "+f+" sec. Try “"+LEVELS[level+1].n+"”."};
+ if(v.slice(-2).every(function(x){return x>b})&&level>0)return{lvl:level-1,txt:"The last 2 sessions took over "+b+" sec. Step back to “"+LEVELS[level-1].n+"”."};
+ return{lvl:level,txt:"Last 3 sessions: "+v.join(", ")+" sec. Keep the current level."};
+}
+function drawFade(){
+ $("#levels").innerHTML=LEVELS.map(function(l,i){return '<label class="lvl'+(i===level?' sel':'')+'"><input type="radio" name="lv" '+(i===level?'checked':'')+' data-l="'+i+'"><span><b>'+l.n+'</b><span class="mute small">'+l.d+'</span></span></label>'}).join("");
+ document.querySelectorAll("[data-l]").forEach(function(r){r.onchange=function(){setLevel(+r.dataset.l)}});
+ var s=suggestion();$("#rec").textContent=s.txt;$("#apply").classList.toggle("hidden",s.lvl===level);
+}
+$("#apply").onclick=function(){setLevel(suggestion().lvl)};
+$("#fadeAt").oninput=$("#backAt").oninput=drawFade;
+
+/* progress */
+function chart(vals){
+ var el=$("#c"),W=600,H=220,l=34,r=10,t=12,bt=28,n=vals.length;
+ var nums=vals.filter(function(x){return x!=null}),mx=Math.ceil(Math.max.apply(null,nums)*1.1);
+ var X=function(i){return l+i*(W-l-r)/(n-1)},Y=function(v){return t+(H-t-bt)*(1-v/mx)};
+ var h="";
+ [0,.5,1].forEach(function(p){var y=Y(mx*p);h+='<line x1="'+l+'" x2="'+(W-r)+'" y1="'+y+'" y2="'+y+'" stroke="var(--line)"/><text x="'+(l-6)+'" y="'+(y+4)+'" text-anchor="end">'+Math.round(mx*p)+'</text>'});
+ var d="",pen=false;
+ vals.forEach(function(v,i){if(v==null){pen=false;return}d+=(pen?"L":"M")+X(i).toFixed(1)+" "+Y(v).toFixed(1);pen=true});
+ h+='<path d="'+d+'" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linejoin="round"/>';
+ vals.forEach(function(v,i){
+  if(v==null)h+='<text x="'+X(i)+'" y="'+(H-bt+14)+'" text-anchor="middle" style="fill:var(--warn)">missed</text>';
+  else h+='<circle cx="'+X(i)+'" cy="'+Y(v)+'" r="4" fill="var(--accent)"/>'});
+ h+='<text x="'+l+'" y="'+(H-4)+'">14 days ago</text><text x="'+(W-r)+'" y="'+(H-4)+'" text-anchor="end">Today</text><text x="'+(l+4)+'" y="'+(t+10)+'">seconds</text>';
+ el.innerHTML=h;
+}
+function avg(a){return a.reduce(function(x,y){return x+y},0)/a.length}
+function drawProgress(){
+ var done=A.filter(function(x){return x!=null}).length;
+ $("#comp").textContent=done+" of "+A.length;
+ var ok=B.filter(function(x){return x!=null}),tr=$("#trend");
+ if(ok.length<8){tr.innerHTML='<span class="flag steady">Not enough data</span>'}
+ else{var k=Math.floor(ok.length/2),e=avg(ok.slice(0,k)),L=avg(ok.slice(-k)),ch=(L-e)/e;
+  tr.innerHTML=ch<-.1?'<span class="flag good">Getting faster</span> <span class="small mute">gap down '+Math.round(-ch*100)+'%</span>':ch>.1?'<span class="flag warn">Slowing down</span> <span class="small mute">gap up '+Math.round(ch*100)+'%</span>':'<span class="flag steady">Steady</span>'}
+ $("#sA").setAttribute("aria-pressed",series==="A");$("#sB").setAttribute("aria-pressed",series==="B");
+ $("#chartNote").textContent=series==="A"?"How long she takes to start. Lower means the cue is working.":"The hand-holding gap. A rising line can mean the routine is slipping.";
+ chart(series==="A"?A:B);
+}
+$("#sA").onclick=function(){series="A";drawProgress()};
+$("#sB").onclick=function(){series="B";drawProgress()};
+$("#file").onchange=function(e){
+ var f=e.target.files[0];if(!f)return;
+ var rd=new FileReader();rd.onload=function(){
+  var rows=String(rd.result).split(/\r?\n/).filter(function(x){return x.trim()&&!/^date/i.test(x)}).slice(-14);
+  if(rows.length<2){$("#imp").textContent="Couldn’t read that file. Check the format above.";return}
+  A=rows.map(function(x){var v=parseFloat(x.split(",")[1]);return isNaN(v)?null:v});
+  B=rows.map(function(x){var v=parseFloat(x.split(",")[2]);return isNaN(v)?null:v});
+  $("#imp").textContent="Imported "+rows.length+" days.";drawProgress();drawFade();
+ };rd.readAsText(f);
+};
+drawFade();drawProgress();
+</script>
+</body>
+</html>
